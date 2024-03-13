@@ -1,0 +1,447 @@
+---
+title: "Project"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+date: "2024-02-29"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(here)
+library(tidyverse)
+library(dplyr)
+library(stringr)
+library(maps)
+library(mapdata)
+library(ggplot2)
+library(ggmap)
+library(countrycode)
+library(rnaturalearth)
+```
+
+
+
+
+
+```{r, include = FALSE}
+# read in data 
+data <- here("data","emdat.csv") %>% read_csv()
+head(data)
+
+
+
+# select columns relevant to research question 
+
+my_data <- data %>% select(c(Historic, DisNo., Historic, `Classification Key`, `Disaster Group`, `Disaster Subgroup`, `Disaster Type`, `Disaster Subtype`, ISO, Country, Subregion, Region, Location, `Start Year`, `Start Month`, `Start Day`))
+
+view(my_data)
+
+```
+
+
+
+```{r, include = FALSE}
+# tidy the names of the columns so its in a better format 
+#changing the names so there are no spaces or capital letter
+
+my_data <- my_data %>% rename(id = DisNo.,
+                   historic = Historic,
+                   classification = `Classification Key`,
+                   group = `Disaster Group`,
+                   subgroup = `Disaster Subgroup`,
+                   type = `Disaster Type`,
+                   subtype = `Disaster Subtype`,
+                   iso = ISO,
+                   country = Country,
+                   subregion = Subregion,
+                   region = Region,
+                   location = Location,
+                   year = `Start Year`,
+                   month = `Start Month`,
+                   day = `Start Day`)
+
+#make sure the class is correct for every variable 
+str(my_data)
+
+
+#change the class to numeric for year, month and day variable
+my_data <- my_data %>% mutate(year = as.numeric(year),
+                   month = as.numeric(month),
+                   day = as.numeric(day))
+
+
+#looking at first few lines 
+head(my_data)
+
+
+```
+
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# starting to explore the data over time
+
+#total number of disasters per year
+my_data %>% group_by(year) %>% summarise(count = n())
+#looks as if the data from before the 90s was markedly lower - it is unlikely due to changes in the environment rather changes in recording quaility of natural disasters over time - need to view this better in a graph.
+
+count_year <- my_data %>% group_by(year) %>% summarise(count = n())
+
+ggplot(count_year, aes(x = year, y = count)) +
+  geom_bar(stat = "identity") +
+  xlim(1980, 2023)
+
+
+#remove any Historic data point 
+updated_data <- my_data %>% filter(historic == "No")
+view(updated_data)
+
+```
+
+```{r}
+#make a new column which categorises the type of natural disaster as direct effetc of climate hcange, indirect effetc of climate chnage and not related
+
+# Define vectors of natural disasters classified as primary and secondary effects of climate change
+primary_effects <- c("Extreme temperature", "Flood", "Storm")
+secondary_effects <- c("Glacial lake outburst flood", "Drought", "Wildfire",  "Mass movement (wet)", " Mass movement (dry)")
+
+# Create a new column indicating the effect of the natural disaster related to climate change
+full_data <- updated_data %>%
+  mutate(climate_change_effect = case_when(
+    updated_data$type %in% primary_effects ~ "Primary effect",
+    updated_data$type  %in% secondary_effects ~ "Secondary effect",
+    TRUE ~ "Not related"
+  ))
+
+full_data
+```
+
+
+
+
+ 
+
+
+## Data Origins
+
+The data set comes from the **Centre for Research on the Epidemiology of Disasters (CRED)**.  This organisation records every instances of natural disasters since 1900 within the EM-DAT database. This comprehensive open source database complies data from various sources; UN agencies, government agencies, research centers, humanitarian organisations, reinsurance companies and world press agencies. For a full list of sources see the [EM-DAT website](https://doc.emdat.be/docs/data-structure-and-content/emdat-sources/). I chose to download all the information regarding natural disasters between the year 1922 and 2022 totaling `r   nrow(my_data)` disasters. After looking at the data it was clear that the historic record before 2000 was too sparse to stand up against the quality of data recording conducted by CRED since its inception in 2000. Rather than looking at changes over a century using the historic record I have decided to focus on non historic entries of natural disasters which have occurred since 2000.  Natural disaster between the year 2000 and 2022 totals  `r nrow(updated_data)`. 
+
+
+
+## Research Questions
+
+* Has there been a change in prevalence of natural disasters types since the year 2000? Particularly has there been an increase in natural disaster related to climate change eg flooding?
+
+* What countries or region have experienced the most natural disasters since the year 2000?
+
+* Has there been a difference in the occurrence of natural disasters per region since the year 2000, for example did North America experience more natural disasters in a particular year? 
+
+
+
+## Variables 
+
+
+To answer my research questions I am interested in where and when different natural disasters occurred. The following variables are of potential interest in asking these questions:
+
+- **historic** - Was the natural disaster before 2000 (when EM-DAT started recording natural disasters in real time)
+- **subgroup** - The disaster subgroup:
+  - Geophysical - a hazard cause by tectonic plate movement i.e., earthquakes 
+  - Hydrological - a hazard cause by extreme changes in distribution of water such as flooding or drought
+  - Meteorlogical - a hazard cause by atmospheric change such as extreme temperature  
+  - Climatological - a hazard cause by sustained periods of hot or cold such as wildfires 
+  - Bioloigcal - a hazard cause by bacteria viruses etc which effect human health i.e. an epidemic 
+extra terrestrial - A hazard caused by asteroids, meteoroids, and comets as they pass near-earth
+
+- **type** - The specific type of disaster i.e., Drought or Earthquake
+
+- **subtype** - More detailed description of the natural disaster i.e., Flash Flood or Lightning
+
+- **iso** -  3-letter code referring to the Country. 
+
+- **country** - Country where the disaster occurred and had an impact
+
+- **subregion** - Subregion where the disaster occurred
+
+- **region** - Region or continent where the disaster occurred
+
+- **location** - Geographical location name as specified in the sources, e.g., city name
+
+- **year**
+
+- **month** 
+
+- **day** 
+
+- **climate_change_effect** - whether the natural disaster is a primary effect of climate change, secondary effect of climate change or unrelated to climate change. Categorized based on [EU report](https://www.europarl.europa.eu/meetdocs/2004_2009/documents/dv/ieep_cc_natural_disasters_/ieep_cc_natural_disasters_en.pdf). 
+
+ 
+
+*for further explanation of each variable see the [codebook](https://doc.emdat.be/docs/data-structure-and-content/emdat-public-table/) provided by the EM-DATA database*
+
+
+
+ 
+```{r}
+#summary of number of disaster per subgroup
+full_data %>% group_by(subgroup) %>% summarise(count = n())
+
+#summary of number of disasters per subgroup per type
+full_data %>% group_by(subgroup, type) %>% summarise(count = n())
+
+
+#summary of number of disasters per subtype
+full_data %>% group_by(subtype) %>% summarise(count = n())
+# this variable may be to specific for the scope of my question
+
+
+#summary of number of disasters per region 
+full_data %>% group_by(region) %>% summarise(count = n())
+
+#summary of number of disasters per region per subregion
+full_data %>% group_by(region, country) %>% summarise(count = n())
+
+#summary of number of disaster per year 
+full_data %>% group_by(year, region) %>% summarise(count = n())
+
+view(full_data)
+
+ 
+```
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#want a graph that show the number of disasters on the y axis and the subgroup of disasters on the x axis split by region
+
+graph_example <- updated_data %>% group_by(subgroup, subtype, region) %>% summarise(count = n())
+view(graph_example)
+
+#disaster by subgroup - simple
+ggplot(graph_example, aes(x = subgroup, y = count)) +
+  geom_bar(stat = "identity", position = "dodge", fill = "dark green") +
+  labs(title = "Number of natural disasters between 2000 - 2022",
+       y = "Number of Disasters",
+       x = "Types of Disasters") +
+  ylim(0,1000) +
+  theme_classic() 
+
+#by type
+ggplot(graph_example, aes(x = subgroup, y = count)) +
+  geom_bar(stat = "identity", position = "dodge", fill = "dark green") +
+  labs(title = "Number of natural disasters between 2000 - 2022",
+       y = "Number of Disasters",
+       x = "Types of Disasters") +
+  ylim(0,1000) +
+  theme_classic() 
+
+#build up graph - split by region 
+ggplot(graph_example, aes(x = subgroup, y = count, fill = region)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Number of natural disasters between 2000-2022",
+       y = "Number of Disasters",
+       x = "Types of Disasters") +
+  ylim(0,1000) +
+  theme_classic() 
+
+#total natural disasters
+year_totals <- updated_data %>% group_by(year, region) %>% summarise(count = n())
+ggplot(year_totals, aes(x = year, y =count, fill = region)) +
+  geom_bar(stat = "identity") +
+  labs(title = "total number of natural disasters which have occured since 2000 split by region") +
+  theme_classic()
+
+```
+ 
+
+
+* Has there been a change in prevalence of natural disasters types since the year 2000? Particularly has there been an increase in natural disaster related to climate change e.g. flooding?
+
+
+```{r}
+#want a line graph which charts changes in prevalence over time split by the 3 conditions. 
+# graph where x is years, y is prevalance 
+
+ ggplot(full_data, aes(x = year, y = after_stat(count), color = climate_change_effect)) +
+  geom_line(stat = "count") +
+  labs(x = "Year", y = "Prevalence", color = "Climate Change Effect") +
+  ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
+  theme_minimal()
+
+```
+
+```{r}
+#exploring extra 
+
+ ggplot(full_data, aes(x = year, y = after_stat(count), color = type)) +
+  geom_line(stat = "count") +
+  labs(x = "Year", y = "Prevalence", color = "type of disaster") +
+  ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
+  theme_minimal()
+ 
+  ggplot(full_data, aes(x = year, y = after_stat(count), color = subgroup)) +
+  geom_line(stat = "count") +
+  labs(x = "Year", y = "Prevalence", color = "category of disaster") +
+  ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
+  theme_minimal()
+```
+
+
+* What countries or region have experienced the most natural disasters since the year 2000? Has this changed over time?
+graph of the world which shows total natural disasters on an atlas - or show how it changes over last 20 years - animated. 
+
+
+```{r}
+# i need the latitude and longitude of every country so i can map it 
+
+
+world1 <- map_data("worldHires")
+head(world1)
+#now have long and lat for every country. what i need is consistency between the naming of 'region' and naming of 'country' in my dataset
+
+#it might be a good idea to make everything lowercase 
+
+#now you need to identify which countries are written differently 
+
+#correct for the inconsistency 
+
+
+
+# Load your dataset containing countries (replace 'your_dataset.csv' with your actual dataset)
+full_data
+  
+    # Extract unique countries  from your dataset
+unique_disaster <- unique(full_data$country)
+
+# extract unique country from world data
+unique_world <- unique(world1$region)
+
+# Check for matching ISO codes
+matching_codes <- unique_disaster %in% unique_world
+
+# Print out the results
+print(matching_codes)
+
+# Extract the indices where matching_codes is FALSE
+mismatch_indices <- which(!matching_codes)
+
+# Extract the specific countries  that do not match
+mismatched_disaster_spelling <- unique_disaster [!matching_codes]
+ 
+# Print out the mismatched
+print(mismatched_disaster_spelling )  
+
+mismatched_world_spelling <- unique_world [!matching_codes]
+print(mismatched_world_spelling)
+```
+
+
+```{r}
+up_data <- full_data %>%
+  mutate(country = recode(country,
+                          "Iran (Islamic Republic of)" = "Iran",
+                          "United States of America" = "USA",
+                          "Réunion"  =  "Reunion",
+                          "Russian Federation"  = "Russia",
+                          "Congo"  = "Republic of Congo",                       
+                          "United Republic of Tanzania"  = "Tanzania",                      
+                          "Eswatini" = "Swaziland",                     
+                          "Bolivia (Plurinational State of)" = "Bolivia",                  
+                          "Czechia"  = "Czech Republic",                       
+                          "Türkiye" =  "Turkey",                     
+                          "Republic of Korea"  = "South Korea",                      
+                          "Serbia Montenegro"  =  "Montenegro",                    
+                          "Micronesia (Federated States of)" = "Micronesia",                     
+                          "United Kingdom of Great Britain and Northern Ireland" = "UK",
+                          "Viet Nam"    = "Vietnam",                        
+                          "Lao People's Democratic Republic"   = "Laos",
+                          "Taiwan (Province of China)" = "Taiwan",                   
+                          "Democratic People's Republic of Korea" = "North Korea",            
+                          "Venezuela (Bolivarian Republic of)"  = "Venezuela",              
+                          "Republic of Moldova"   = "Moldova",                   
+                          "Syrian Arab Republic"    = "Syria",                     
+                          "Côte d’Ivoire"      =   "Ivory Coast",                
+                          "Saint Vincent and the Grenadines"= "Saint Vincent",               
+                          "Netherlands (Kingdom of the)" = "Netherlands" ,                  
+                          "China, Hong Kong Special Administrative Region"   = "China" ,  
+                          "China, Macao Special Administrative Region"      = "China",     
+                          "Cabo Verde"  = "Cape Verde",                
+                          "United States Virgin Islands"   = "Virgin Islands",                 
+                                  
+                          "State of Palestine"    = "Palestine",                 
+                         "Saint Kitts and Nevis" 	= "Saint Kitts",
+                          "Wallis and Futuna Islands"  = "Wallis and Futuna",                 
+                          "Saint Barthélemy"     = "Saint Barthelemy",               
+                          "Saint Martin (French Part)"  = "Saint Martin",                   
+                          "Sint Maarten (Dutch part)"  = "Saint Martin",                
+                          "British Virgin Islands"     = "Virgin Islands" ))
+                          
+#
+                      
+     
+
+
+
+
+
+up_unique_disaster <- unique(up_data$country)
+
+# extract unique country from world data
+unique_world <- unique(world1$region)
+
+# Check for matching ISO codes
+up_matching_codes <- up_unique_disaster %in% unique_world
+
+# Print out the results
+print(up_matching_codes)
+
+# Extract the indices where matching_codes is FALSE
+up_mismatch_indices <- which(!up_matching_codes)
+
+# Extract the specific countries  that do not match
+up_mismatched_disaster_spelling <- up_unique_disaster [!up_matching_codes]
+ 
+# Print out the mismatched
+print(up_mismatched_disaster_spelling )  
+
+
+
+
+
+
+
+```
+              
+```{r}
+world <- map_data("world") %>% 
+  filter(region != "Antarctica")
+
+
+basic_unique_disaster <- unique(up_data$country)
+
+# extract unique country from world data
+basic_unique_world <- unique(world$region)
+
+# Check for matching ISO codes
+basic_matching_codes <- basic_unique_disaster %in% basic_unique_world
+
+# Print out the results
+print(basic_matching_codes)
+
+# Extract the indices where matching_codes is FALSE
+basic_mismatch_indices <- which(!basic_matching_codes)
+
+# Extract the specific countries  that do not match
+basic_mismatched_disaster_spelling <- basic_unique_disaster [!basic_matching_codes]
+ 
+# Print out the mismatched
+print(basic_mismatched_disaster_spelling ) 
+```
+ 
+   "Trinidad and Tobago"            
+ "Antigua and Barbuda"   
+ "Tuvalu"               
+  "Tokelau"    
