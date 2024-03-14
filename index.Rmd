@@ -14,12 +14,9 @@ library(here)
 library(tidyverse)
 library(dplyr)
 library(stringr)
-library(maps)
-library(mapdata)
+library(plotly)
 library(ggplot2)
-library(ggmap)
-library(countrycode)
-library(rnaturalearth)
+ 
 ```
 
 
@@ -133,11 +130,10 @@ The data set comes from the **Centre for Research on the Epidemiology of Disaste
 
 ## Research Questions
 
-* Has there been a change in prevalence of natural disasters types since the year 2000? Particularly has there been an increase in natural disaster related to climate change eg flooding?
+* Has there been a change in prevalence of natural disasters types since the year 2000? Particularly has there been an increase in natural disaster related to climate change i.e. flooding?
 
-* What countries or region have experienced the most natural disasters since the year 2000?
+* What regions are most efffected by natural disasters?
 
-* Has there been a difference in the occurrence of natural disasters per region since the year 2000, for example did North America experience more natural disasters in a particular year? 
 
 
 
@@ -208,20 +204,15 @@ full_data %>% group_by(year, region) %>% summarise(count = n())
 
 view(full_data)
 
- 
+
 ```
 
-
-
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-#want a graph that show the number of disasters on the y axis and the subgroup of disasters on the x axis split by region
-
-graph_example <- updated_data %>% group_by(subgroup, subtype, region) %>% summarise(count = n())
+```{r}
+graph_example <- full_data %>% group_by(subgroup, subtype, region, climate_change_effect) %>% summarise(count = n())
 view(graph_example)
 
-#disaster by subgroup - simple
-ggplot(graph_example, aes(x = subgroup, y = count)) +
+#disaster by region - simple
+ggplot(graph_example, aes(x = region, y = count)) +
   geom_bar(stat = "identity", position = "dodge", fill = "dark green") +
   labs(title = "Number of natural disasters between 2000 - 2022",
        y = "Number of Disasters",
@@ -254,8 +245,21 @@ ggplot(year_totals, aes(x = year, y =count, fill = region)) +
   labs(title = "total number of natural disasters which have occured since 2000 split by region") +
   theme_classic()
 
+#total number of natural disaster per region split by  climate change 
+ggplot(graph_example, aes(x = region, y = count, fill = climate_change_effect)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Number of natural disasters between 2000-2022",
+       y = "Number of Disasters",
+       x = "Types of Disasters",
+       fill = "climate change effect") +
+  ylim(0,1000) +
+  theme_classic() 
+
+
+
 ```
- 
+
+
 
 
 * Has there been a change in prevalence of natural disasters types since the year 2000? Particularly has there been an increase in natural disaster related to climate change e.g. flooding?
@@ -264,12 +268,17 @@ ggplot(year_totals, aes(x = year, y =count, fill = region)) +
 ```{r}
 #want a line graph which charts changes in prevalence over time split by the 3 conditions. 
 # graph where x is years, y is prevalance 
+overall_disaster <- full_data %>%
+  group_by(year) %>%
+  summarise(total_disasters = n())
 
  ggplot(full_data, aes(x = year, y = after_stat(count), color = climate_change_effect)) +
   geom_line(stat = "count") +
+    geom_line(data = overall_disaster, aes(y = total_disasters, color = "Total Disasters")) +
   labs(x = "Year", y = "Prevalence", color = "Climate Change Effect") +
   ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
   theme_minimal()
+ 
 
 ```
 
@@ -290,158 +299,74 @@ ggplot(year_totals, aes(x = year, y =count, fill = region)) +
 ```
 
 
-* What countries or region have experienced the most natural disasters since the year 2000? Has this changed over time?
-graph of the world which shows total natural disasters on an atlas - or show how it changes over last 20 years - animated. 
-
+* What regions have experienced the most natural disasters since the year 2000? Has this changed over time?
 
 ```{r}
-# i need the latitude and longitude of every country so i can map it 
-
-
-world1 <- map_data("worldHires")
-head(world1)
-#now have long and lat for every country. what i need is consistency between the naming of 'region' and naming of 'country' in my dataset
-
-#it might be a good idea to make everything lowercase 
-
-#now you need to identify which countries are written differently 
-
-#correct for the inconsistency 
-
-
-
-# Load your dataset containing countries (replace 'your_dataset.csv' with your actual dataset)
-full_data
-  
-    # Extract unique countries  from your dataset
-unique_disaster <- unique(full_data$country)
-
-# extract unique country from world data
-unique_world <- unique(world1$region)
-
-# Check for matching ISO codes
-matching_codes <- unique_disaster %in% unique_world
-
-# Print out the results
-print(matching_codes)
-
-# Extract the indices where matching_codes is FALSE
-mismatch_indices <- which(!matching_codes)
-
-# Extract the specific countries  that do not match
-mismatched_disaster_spelling <- unique_disaster [!matching_codes]
  
-# Print out the mismatched
-print(mismatched_disaster_spelling )  
+total_disasters <- full_data %>%
+  group_by(year, region) %>%
+  summarise(total_disasters = n())
 
-mismatched_world_spelling <- unique_world [!matching_codes]
-print(mismatched_world_spelling)
-```
-
-
-```{r}
-up_data <- full_data %>%
-  mutate(country = recode(country,
-                          "Iran (Islamic Republic of)" = "Iran",
-                          "United States of America" = "USA",
-                          "Réunion"  =  "Reunion",
-                          "Russian Federation"  = "Russia",
-                          "Congo"  = "Republic of Congo",                       
-                          "United Republic of Tanzania"  = "Tanzania",                      
-                          "Eswatini" = "Swaziland",                     
-                          "Bolivia (Plurinational State of)" = "Bolivia",                  
-                          "Czechia"  = "Czech Republic",                       
-                          "Türkiye" =  "Turkey",                     
-                          "Republic of Korea"  = "South Korea",                      
-                          "Serbia Montenegro"  =  "Montenegro",                    
-                          "Micronesia (Federated States of)" = "Micronesia",                     
-                          "United Kingdom of Great Britain and Northern Ireland" = "UK",
-                          "Viet Nam"    = "Vietnam",                        
-                          "Lao People's Democratic Republic"   = "Laos",
-                          "Taiwan (Province of China)" = "Taiwan",                   
-                          "Democratic People's Republic of Korea" = "North Korea",            
-                          "Venezuela (Bolivarian Republic of)"  = "Venezuela",              
-                          "Republic of Moldova"   = "Moldova",                   
-                          "Syrian Arab Republic"    = "Syria",                     
-                          "Côte d’Ivoire"      =   "Ivory Coast",                
-                          "Saint Vincent and the Grenadines"= "Saint Vincent",               
-                          "Netherlands (Kingdom of the)" = "Netherlands" ,                  
-                          "China, Hong Kong Special Administrative Region"   = "China" ,  
-                          "China, Macao Special Administrative Region"      = "China",     
-                          "Cabo Verde"  = "Cape Verde",                
-                          "United States Virgin Islands"   = "Virgin Islands",                 
-                                  
-                          "State of Palestine"    = "Palestine",                 
-                         "Saint Kitts and Nevis" 	= "Saint Kitts",
-                          "Wallis and Futuna Islands"  = "Wallis and Futuna",                 
-                          "Saint Barthélemy"     = "Saint Barthelemy",               
-                          "Saint Martin (French Part)"  = "Saint Martin",                   
-                          "Sint Maarten (Dutch part)"  = "Saint Martin",                
-                          "British Virgin Islands"     = "Virgin Islands" ))
-                          
-#
-                      
-     
-
-
-
-
-
-up_unique_disaster <- unique(up_data$country)
-
-# extract unique country from world data
-unique_world <- unique(world1$region)
-
-# Check for matching ISO codes
-up_matching_codes <- up_unique_disaster %in% unique_world
-
-# Print out the results
-print(up_matching_codes)
-
-# Extract the indices where matching_codes is FALSE
-up_mismatch_indices <- which(!up_matching_codes)
-
-# Extract the specific countries  that do not match
-up_mismatched_disaster_spelling <- up_unique_disaster [!up_matching_codes]
- 
-# Print out the mismatched
-print(up_mismatched_disaster_spelling )  
-
-
-
-
+# Plotting
+ggplot(full_data, aes(x = year, y = after_stat(count), color = climate_change_effect)) +
+  geom_line(stat = "count") +
+  geom_line(data = total_disasters, aes(y = total_disasters, color = "Total Disasters")) +
+  labs(x = "Year", y = "Prevalence", color = "Climate Change Effect", linetype = "Legend") +
+  scale_color_manual(values = c("dark green", "red", "blue", "grey")) +
+  ggtitle("Prevalence of Natural Disasters from 2000 - 2022 broken down per region") +
+  facet_wrap(~ region, scales = "free_x", nrow = 3) 
 
 
 
 ```
-              
+
 ```{r}
-world <- map_data("world") %>% 
-  filter(region != "Antarctica")
+#how can i make my maps interactive 
+
+interactive_plot <- ggplotly(
+  ggplot(full_data, aes(x = year, y = after_stat(count), color = climate_change_effect)) +
+    geom_line(stat = "count") +
+    geom_line(data = total_disasters, aes(y = total_disasters, color = "Total Disasters")) +
+    labs(x = "Year", y = "Prevalence", color = "Climate Change Effect", linetype = "Legend") +
+    ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
+    theme_minimal() +
+    scale_color_manual(values = c("grey", "red", "orange", "black")) +
+    facet_wrap(~ region, scales = "free_x", nrow = 3)
+)
+
+# Show interactive plot
+interactive_plot
 
 
-basic_unique_disaster <- unique(up_data$country)
-
-# extract unique country from world data
-basic_unique_world <- unique(world$region)
-
-# Check for matching ISO codes
-basic_matching_codes <- basic_unique_disaster %in% basic_unique_world
-
-# Print out the results
-print(basic_matching_codes)
-
-# Extract the indices where matching_codes is FALSE
-basic_mismatch_indices <- which(!basic_matching_codes)
-
-# Extract the specific countries  that do not match
-basic_mismatched_disaster_spelling <- basic_unique_disaster [!basic_matching_codes]
- 
-# Print out the mismatched
-print(basic_mismatched_disaster_spelling ) 
 ```
+```{r}
+interactive_plot2 <- ggplotly(
+  ggplot(full_data, aes(x = year, y = after_stat(count), color = subgroup)) +
+    geom_line(stat = "count") +
+    geom_line(data = total_disasters, aes(y = total_disasters, color = "Total Disasters")) +
+    labs(x = "Year", y = "Prevalence", color = "subgroup", linetype = "Legend") +
+    ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
+    theme_minimal() +
+    scale_color_manual(values = c("grey", "red", "orange", "black", "green", "pink", "purple")) +
+    facet_wrap(~ region, scales = "free_x", nrow = 3)
+)
+
+interactive_plot2
+```
+
+```{r}
+interactive_plot3 <- ggplotly(
+  ggplot(full_data, aes(x = year, y = after_stat(count), color = subgroup)) +
+    geom_line(stat = "count") +
+    geom_line(data = total_disasters, aes(y = total_disasters, color = "Total Disasters")) +
+    labs(x = "Year", y = "Prevalence", color = "subgroup", linetype = "Legend") +
+    ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
+    theme_minimal() +
+    scale_color_manual(values = c("grey", "red", "orange", "black", "green", "pink", "purple")) )
+
+interactive_plot3
+```
+
+
  
-   "Trinidad and Tobago"            
- "Antigua and Barbuda"   
- "Tuvalu"               
-  "Tokelau"    
+
