@@ -107,7 +107,7 @@ view(updated_data)
 # Define vectors of natural disasters classified as primary and secondary effects of climate change
 primary_effects <- c("Extreme temperature", "Flood", "Storm")
 secondary_effects <- c("Glacial lake outburst flood", "Drought", "Wildfire",  "Mass movement (wet)", " Mass movement (dry)")
-
+ 
 # Create a new column indicating the effect of the natural disaster related to climate change
 full_data <- updated_data %>%
   mutate(climate_change_effect = case_when(
