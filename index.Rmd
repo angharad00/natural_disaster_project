@@ -210,7 +210,7 @@ full_data %>% group_by(year, region) %>% summarise(count = n())
 
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.height=6, fig.width=10}
 graph_example <- full_data %>% group_by(subgroup, subtype, region, climate_change_effect) %>% summarise(count = n())
 view(graph_example)
 
@@ -263,7 +263,7 @@ ggplot(graph_example, aes(x = region, y = count, fill = climate_change_effect)) 
 * Has there been a change in prevalence of natural disasters types since the year 2000? Particularly has there been an increase in natural disaster related to climate change e.g. flooding?
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.height=6, fig.width=10}
 
 #TOTALS NOT SPLIT BY REGION
 #want a line graph which charts changes in prevalence over time split by the 3 conditions. 
@@ -316,7 +316,7 @@ interactive_plot3
 
 * What regions have experienced the most natural disasters since the year 2000? Has this changed over time?
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.height=6, fig.width=10}
 #split by region 
 
 
@@ -360,7 +360,7 @@ plot2.2 <- ggplot(full_data, aes(x = year, y = after_stat(count), color = subgro
 interactive_plot2.2 <- ggplotly(plot2.2)
 interactive_plot2.2
 
-plot3.2 <- ggplot(full_data, aes(x = year, y = after_stat(count), color = type)) +
+plot3.2 <- ggplot(full_data, aes(x = year, y = after_stat(count), color = type, )) +
     geom_line(stat = "count") +
     geom_line(data = total_disasters, aes(y = count, color = "Total Disasters")) +
     labs(x = "Year", y = "Prevalence", color = "type", linetype = "Legend") +
@@ -384,7 +384,7 @@ interactive_plot3.2
 
  
  
-```{r echo=FALSE}
+```{r echo=FALSE, fig.height=6, fig.width=10}
  breakdown <- full_data %>% group_by(year, region, type, climate_change_effect) %>%
   summarise(count = n())
 
@@ -417,5 +417,130 @@ interactive_plot_b
 
  
   
+ 
+```{r echo=FALSE, fig.height=6, fig.width=10}
+# Create hover text including region and subtype information
+hover_text <- paste("Region: ", full_data$region,
+                    "<br>Type: ", full_data$type,
+                    "<br>Subtype: ", full_data$subgroup,
+                    "<br>Climate Effect: ", full_data$climate_change_effect)
+
+
+
+p <- ggplot(full_data, aes(x = year, y = after_stat(count), color = type, text = hover_text)) +
+    geom_line(stat = "count") +
+  facet_wrap(~ region)
+
+ 
+ip<- ggplotly(p)
+ip
+
+p <- ggplot(full_data, aes(x = year, y = after_stat(count), color = climate_change_effect, text = hover_text)) +
+    geom_line(stat = "count") +
+  facet_wrap(~ region)
+
+ 
+ip<- ggplotly(p)
+ip 
+ 
+
+
+p <- ggplot(full_data, aes(y = year, x = after_stat(count), color = climate_change_effect, text = hover_text)) +
+    geom_bar(stat = "count") +
+  facet_wrap(~ region)
+
+ 
+ip<- ggplotly(p)
+ip 
+
+
+ 
+```
+```{r, echo=FALSE, fig.height=6, fig.width=10}
+ ggplot(full_data, aes(y = year, x = after_stat(count), color = climate_change_effect, text = hover_text)) +
+    geom_bar(stat = "count", alpha = 0.6) +
+  facet_wrap(~ region)
+
+
+ 
+
+
+p <- ggplot(full_data, aes(x = year,  y = after_stat(count), fill = interaction(climate_change_effect), text = hover_text)) +
+  geom_bar(position = "fill") +
+  facet_wrap(~ region) +
+  labs(title = "Natural Disasters by Climate Change Effect and Type",
+       x = "Climate Change Effect",
+       y = "Number of Disasters") +
+  theme_minimal()
+
+ip<- ggplotly(p)
+ip 
+```
+
+```{r, echo=FALSE, fig.height=6, fig.width=10}
+hover_text <- paste(
+                    "Region: ", full_data$region,
+                    "<br>Type: ", full_data$type,
+                    "<br>Subtype: ", full_data$subgroup)
+
+
+p <- ggplot(full_data, aes(x = year,  y = after_stat(count), fill = interaction(climate_change_effect), text = hover_text)) +
+  geom_bar(position = "stack", alpha = 0.8, colour = "white", size = 0.3) +
+  facet_wrap(~ region, scales = "free_x") +
+  scale_fill_manual(values = c("grey", "blue", "light blue")) + 
+  labs(title = "Prevelance of Natural Disasters per Region split by Effect of Climate Change",
+       x = "Year",
+       y = "Number of Disasters",
+       fill = "Effect of Climate Change") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ip<- ggplotly(p)
+ip 
+```
+ 
+CHANGE THE COLOUR SCHEME 
+ 
+
+ 
+```{r echo=FALSE, fig.height=6, fig.width=10}
+class(full_data$climate_change_effect)
+full_data$climate_change_effect <- factor(full_data$climate_change_effect)
+class(full_data$climate_change_effect)
+levels(full_data$climate_change_effect)
+full_data$climate_change_effect <- factor(full_data$climate_change_effect, levels = c("Primary effect", "Secondary effect", "Not related")) 
+
+hover_text <- paste(
+  "Year: ", full_data$year,
+  "<br>Climate Change Effect: ", full_data$climate_change_effect,
+  "<br>Type: ", full_data$type,
+  "<br>Subtype: ", full_data$subgroup,
+  "<br>Region: ", full_data$region
+  )
+
+# Replace "interaction(climate_change_effect)" with "Climate Change Effect" in hover text
+
+
+
+p <- ggplot(full_data, aes(x = year,  y = after_stat(count), fill = climate_change_effect, text = hover_text)) +
+  geom_bar(position = "stack", alpha = 0.8, colour = "white", size = 0.3) +
+  facet_wrap(~ region, scales = "free_x") +
+  scale_fill_manual(values = c("red", "orange", "grey")) + 
+  labs(title = "Prevelance of Natural Disasters per Region split by Effect of Climate Change",
+       x = "Year",
+       y = "Number of Disasters",
+       fill = "Effect of Climate Change") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+ 
+
+ip<- ggplotly(p, tooltip = c( "y", "text")) %>%
+  layout(
+         hoverinfo = "text",
+         separators = ","
+  )
+ip 
+```
+ 
  
  
