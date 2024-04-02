@@ -2,7 +2,24 @@
 title: "Project"
 output:
   html_document: 
-  css: styles.css
+    css: styles.css
+---
+
+<style>
+  /* Ensure images are responsive */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Adjust plot margins for smaller screens */
+  @media only screen and (max-width: 600px) {
+    .figure {
+      margin-left: -20px; /* Adjust as needed */
+      margin-right: -20px; /* Adjust as needed */
+    }
+  }
+</style>
   pdf_document: default
   word_document: default
 date: "2024-02-29"
@@ -290,4 +307,5 @@ ip
 
  
 ```
+ 
  
