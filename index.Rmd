@@ -1,14 +1,15 @@
 ---
 title: "Project"
 output:
-  html_document: default
+  html_document: 
+  css: styles.css
   pdf_document: default
   word_document: default
 date: "2024-02-29"
 ---
 
 ```{r setup, include = FALSE, echo=FALSE}
-knitr::opts_chunk$set(
+knitr::opts_chunk$set(fig.width=10, fig.height=6,
 	message = FALSE,
 	warning = FALSE
 )
@@ -22,7 +23,7 @@ library(ggrepel)
  
 ```
 
-
+ 
 
 
 
@@ -158,21 +159,11 @@ extra terrestrial - A hazard caused by asteroids, meteoroids, and comets as they
 
 - **subtype** - More detailed description of the natural disaster i.e., Flash Flood or Lightning
 
-- **iso** -  3-letter code referring to the Country. 
-
 - **country** - Country where the disaster occurred and had an impact
-
-- **subregion** - Subregion where the disaster occurred
 
 - **region** - Region or continent where the disaster occurred
 
-- **location** - Geographical location name as specified in the sources, e.g., city name
-
-- **year**
-
-- **month** 
-
-- **day** 
+- **year** - the year the disaster started
 
 - **climate_change_effect** - whether the natural disaster is a primary effect of climate change, secondary effect of climate change or unrelated to climate change. Categorized based on [EU report](https://www.europarl.europa.eu/meetdocs/2004_2009/documents/dv/ieep_cc_natural_disasters_/ieep_cc_natural_disasters_en.pdf). 
 
@@ -211,7 +202,7 @@ full_data %>% group_by(year, region) %>% summarise(count = n())
 ```
 
 
-* Has there been a change in prevalence of natural disasters types since the year 2000? Particularly has there been an increase in natural disaster related to climate change e.g. flooding?
+### *Has there been a change in prevalence of natural disasters types since the year 2000? Particularly has there been an increase in natural disaster related to climate change e.g. flooding?*
 
 
 ```{r echo=FALSE}
@@ -239,112 +230,26 @@ plot1 <-
   group_by(year) %>%
   summarise(total_disasters = n())
 
-plot2 <- 
-  ggplot(full_data, aes(x = year, y = after_stat(count), color = subgroup)) +
-    geom_line(stat = "count") +
-    geom_line(data = t_disasters, aes(y = total_disasters, color = "Total Disasters")) +
-    labs(x = "Year", y = "Prevalence", color = "subgroup", linetype = "Legend") +
-    ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
-    theme_minimal() +
-    scale_color_manual(values = c("grey", "red", "orange", "black", "green", "pink", "purple")) 
-
-interactive_plot2 <- ggplotly(plot2)
-interactive_plot2
-
-plot3 <- ggplot(full_data, aes(x = year, y = after_stat(count), color = type)) +
-  geom_line(stat = "count") +
-    geom_line(data = t_disasters, aes(y = total_disasters, color = "Total Disasters")) +
-  labs(x = "Year", y = "Prevalence", color = "type of disaster") +
-  ggtitle("Prevalence of Natural Disasters from 2000 - 2022 by specific type of disaster") +
-  theme_minimal()
-
-interactive_plot3 <- ggplotly(plot3)
-interactive_plot3
 ```
 
  
 
 
-* What regions have experienced the most natural disasters since the year 2000? Has this changed over time?
-
-```{r echo=FALSE}
-#split by region 
-
-
-total_disasters <- full_data %>%
-  group_by(year, region) %>%
-  summarise(count = n())
-
- 
-
-#plot the same climate change graphs now split by region
-plot1.2 <- ggplot(full_data, aes(x = year, y = after_stat(count), color = climate_change_effect)) +
-    geom_line(stat = "count") +
-    geom_line(data = total_disasters, aes(y = count, color = "Total Disasters")) +
-    labs(x = "Year", y = "Prevalence", color = "Climate Change Effect", linetype = "Legend") +
-    ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
-    theme_minimal() +
-    scale_color_manual(values = c("grey", "red", "orange", "black")) +
-    facet_wrap(~ region, scales = "free_x", nrow = 3)
-    
-    
-    
-    
-
-# Show interactive plot
-interactive_plot1.2 <- ggplotly(plot1.2)
-interactive_plot1.2
-
-plot2.2 <- ggplot(full_data, aes(x = year, y = after_stat(count), color = subgroup)) +
-    geom_line(stat = "count") +
-    geom_line(data = total_disasters, aes(y = count, color = "Total Disasters")) +
-    labs(x = "Year", y = "Prevalence", color = "subgroup", linetype = "Legend") +
-    ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
-    theme_minimal() +
-    facet_wrap(~ region, scales = "free_x", nrow = 3)
-    
-   
-    
-    
-
-# Show interactive plot
-interactive_plot2.2 <- ggplotly(plot2.2)
-interactive_plot2.2
-
-plot3.2 <- ggplot(full_data, aes(x = year, y = after_stat(count), color = type, )) +
-    geom_line(stat = "count") +
-    geom_line(data = total_disasters, aes(y = count, color = "Total Disasters")) +
-    labs(x = "Year", y = "Prevalence", color = "type", linetype = "Legend") +
-    ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
-    theme_classic() +
-    facet_wrap(~ region, scales = "free_x", nrow = 3)
-    
-  
-    
-    
-
-# Show interactive plot
-interactive_plot3.2 <- ggplotly(plot3.2)
-interactive_plot3.2
-
-
-
-```
+### *What regions have experienced the most natural disasters since the year 2000? Has this changed over time?*
 
  
  
- 
-CHANGE THE COLOUR SCHEME 
  
 
  
 ```{r echo=FALSE}
-class(full_data$climate_change_effect)
+
 full_data$climate_change_effect <- factor(full_data$climate_change_effect)
-class(full_data$climate_change_effect)
-levels(full_data$climate_change_effect)
+
 full_data$climate_change_effect <- factor(full_data$climate_change_effect, levels = c("Primary effect", "Secondary effect", "Not related")) 
 
+#class(full_data$climate_change_effect)
+#levels(full_data$climate_change_effect)
 hover_text <- paste(
   "Year: ", full_data$year,
   "<br>Climate Change Effect: ", full_data$climate_change_effect,
@@ -360,7 +265,7 @@ hover_text <- paste(
 p <- ggplot(full_data, aes(x = year,  y = after_stat(count), fill = climate_change_effect, text = hover_text)) +
   geom_bar(position = "stack", alpha = 0.8, colour = "white", size = 0.3) +
   facet_wrap(~ region, scales = "free_x") +
-  scale_fill_manual(values = c("red", "orange", "grey")) + 
+  scale_fill_manual(values = c("red", "orange", "black")) + 
   labs(title = "Prevelance of Natural Disasters per Region split by Effect of Climate Change",
        subtitle = "Data from EM-DAT",
        x = "Year",
@@ -380,7 +285,7 @@ ip<- ggplotly(p, tooltip = c( "y", "text")) %>%
          separators = ","
   )
 ip 
-
+ 
  
 
  
