@@ -1,8 +1,7 @@
 ---
 title: "Project"
 output:
-  html_document: 
-    css: styles.css
+  html_document: default
   pdf_document: default
   word_document: default
 date: "2024-02-29"
@@ -221,7 +220,7 @@ plot1 <-
   labs(x = "Year", y = "Prevalence", color = "Climate Change Effect") +
   ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
   theme_minimal() 
-   interactive_plot1 <- ggplotly(plot1)
+   interactive_plot1 <- ggplotly(plot1) %>% layout(width = NULL, height = NULL)
    
      interactive_plot1
 #want a line graph which charts in prevelance over time splut by the types of natural disasters 
@@ -276,14 +275,7 @@ p <- ggplot(full_data, aes(x = year,  y = after_stat(count), fill = climate_chan
  
  
 
-ip<- ggplotly(p, tooltip = c( "y", "text")) %>%
-  layout(
-         annotations = list(text = "Source: EM-DAT database",
-                            x = -1 , y = -1,
-                            showarrow = FALSE),
-         hoverinfo = "text",
-         separators = ","
-  )
+ip<- ggplotly(p, tooltip = c( "y", "text")) %>% layout(width = NULL, height = NULL)
 ip 
  
  
