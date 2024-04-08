@@ -1,14 +1,14 @@
 ---
 title: "Project"
 output:
-  html_document: default
-  pdf_document: default
-  word_document: default
-date: "2024-02-29"
+  html_document:
+    toc: true
+    toc_float: true
+date: "`r Sys.Date()`"
 ---
 
 ```{r setup, include = FALSE, echo=FALSE}
-knitr::opts_chunk$set(
+knitr::opts_chunk$set(fig.width=8, fig.height=6,
 	message = FALSE,
 	warning = FALSE
 )
@@ -19,12 +19,53 @@ library(stringr)
 library(plotly)
 library(ggplot2)
 library(ggrepel)
- 
+library(htmlwidgets) 
 ```
 
+
+
+
+
+
+
+
+# Data Origins
+
+The data set comes from the **Centre for Research on the Epidemiology of Disasters (CRED)**.  This organisation records every instances of natural disasters since 1900 within the EM-DAT database. This comprehensive open source database complies data from various sources; UN agencies, government agencies, research centers, humanitarian organisations, reinsurance companies and world press agencies. For a full list of sources see the [EM-DAT website](https://doc.emdat.be/docs/data-structure-and-content/emdat-sources/). I chose to download all the information regarding natural disasters between the year 1922 and 2022 . After looking at the data it was clear that the historic record before 2000 was too sparse to stand up against the quality of data recording conducted by CRED since its inception in 2000. Rather than looking at changes over a century using the historic record I have decided to focus on non historic entries of natural disasters which have occurred since 2000.   
+
+
+## Variables 
+
+
+To answer my research questions I am interested in where and when different natural disasters occurred. The following variables are of potential interest in asking these questions:
+
+- **historic** - Was the natural disaster before 2000 (when EM-DAT started recording natural disasters in real time)
+- **subgroup** - The disaster subgroup:
+  - Geophysical - a hazard cause by tectonic plate movement i.e., earthquakes 
+  - Hydrological - a hazard cause by extreme changes in distribution of water such as flooding or drought
+  - Meteorlogical - a hazard cause by atmospheric change such as extreme temperature  
+  - Climatological - a hazard cause by sustained periods of hot or cold such as wildfires 
+  - Bioloigcal - a hazard cause by bacteria viruses etc which effect human health i.e. an epidemic 
+extra terrestrial - A hazard caused by asteroids, meteoroids, and comets as they pass near-earth
+
+- **type** - The specific type of disaster i.e., Drought or Earthquake
+
+- **subtype** - More detailed description of the natural disaster i.e., Flash Flood or Lightning
+
+- **country** - Country where the disaster occurred and had an impact
+
+- **region** - Region or continent where the disaster occurred
+
+- **year** - the year the disaster started
+
+- **climate_change_effect** - whether the natural disaster is a primary effect of climate change, secondary effect of climate change or unrelated to climate change. Categorized based on [EU report](https://www.europarl.europa.eu/meetdocs/2004_2009/documents/dv/ieep_cc_natural_disasters_/ieep_cc_natural_disasters_en.pdf). 
+
  
 
+*for further explanation of each variable see the [codebook](https://doc.emdat.be/docs/data-structure-and-content/emdat-public-table/) provided by the EM-DATA database*
 
+
+## Code 
 
 ```{r include=FALSE}
 # read in data 
@@ -40,6 +81,20 @@ my_data <- data %>% select(c(Historic, DisNo., Historic, `Classification Key`, `
 view(my_data)
 
 ```
+
+
+# Research Questions
+
+* Has there been a change in prevalence of natural disasters types since the year 2000? Particularly has there been an increase in natural disaster related to climate change i.e. flooding?
+
+* What regions are most effected by natural disasters?
+
+
+
+# Data Preparation
+steps taken to clean the data, exclude outliers, sanity check the data range and values, create summary statistics, grouped variables, etc
+show the first few rows of the processed data, if possible
+showing the code which does this where relevant
 
 
 
@@ -122,54 +177,6 @@ head(full_data)
 
 
 
- 
-
-
-## Data Origins
-
-The data set comes from the **Centre for Research on the Epidemiology of Disasters (CRED)**.  This organisation records every instances of natural disasters since 1900 within the EM-DAT database. This comprehensive open source database complies data from various sources; UN agencies, government agencies, research centers, humanitarian organisations, reinsurance companies and world press agencies. For a full list of sources see the [EM-DAT website](https://doc.emdat.be/docs/data-structure-and-content/emdat-sources/). I chose to download all the information regarding natural disasters between the year 1922 and 2022 totaling `r   nrow(my_data)` disasters. After looking at the data it was clear that the historic record before 2000 was too sparse to stand up against the quality of data recording conducted by CRED since its inception in 2000. Rather than looking at changes over a century using the historic record I have decided to focus on non historic entries of natural disasters which have occurred since 2000.  Natural disaster between the year 2000 and 2022 totals  `r nrow(updated_data)`. 
-
-
-
-## Research Questions
-
-* Has there been a change in prevalence of natural disasters types since the year 2000? Particularly has there been an increase in natural disaster related to climate change i.e. flooding?
-
-* What regions are most efffected by natural disasters?
-
-
-
-
-## Variables 
-
-
-To answer my research questions I am interested in where and when different natural disasters occurred. The following variables are of potential interest in asking these questions:
-
-- **historic** - Was the natural disaster before 2000 (when EM-DAT started recording natural disasters in real time)
-- **subgroup** - The disaster subgroup:
-  - Geophysical - a hazard cause by tectonic plate movement i.e., earthquakes 
-  - Hydrological - a hazard cause by extreme changes in distribution of water such as flooding or drought
-  - Meteorlogical - a hazard cause by atmospheric change such as extreme temperature  
-  - Climatological - a hazard cause by sustained periods of hot or cold such as wildfires 
-  - Bioloigcal - a hazard cause by bacteria viruses etc which effect human health i.e. an epidemic 
-extra terrestrial - A hazard caused by asteroids, meteoroids, and comets as they pass near-earth
-
-- **type** - The specific type of disaster i.e., Drought or Earthquake
-
-- **subtype** - More detailed description of the natural disaster i.e., Flash Flood or Lightning
-
-- **country** - Country where the disaster occurred and had an impact
-
-- **region** - Region or continent where the disaster occurred
-
-- **year** - the year the disaster started
-
-- **climate_change_effect** - whether the natural disaster is a primary effect of climate change, secondary effect of climate change or unrelated to climate change. Categorized based on [EU report](https://www.europarl.europa.eu/meetdocs/2004_2009/documents/dv/ieep_cc_natural_disasters_/ieep_cc_natural_disasters_en.pdf). 
-
- 
-
-*for further explanation of each variable see the [codebook](https://doc.emdat.be/docs/data-structure-and-content/emdat-public-table/) provided by the EM-DATA database*
-
 
 
  
@@ -200,13 +207,19 @@ full_data %>% group_by(year, region) %>% summarise(count = n())
 
 ```
 
+# Visualisations
+graph or graphs
+documentation explaining any motivation (although good graph labelling is better than explanation in the accompanying text)
+code for producing them
 
-### *Has there been a change in prevalence of natural disasters types since the year 2000? Particularly has there been an increase in natural disaster related to climate change e.g. flooding?*
+### Question 1 
+
+**Has there been a change in prevalence of natural disasters types since the year 2000? Particularly has there been an increase in natural disaster related to climate change e.g. flooding?**
 
 
 ```{r echo=FALSE}
 
-#TOTALS NOT SPLIT BY REGION
+#Overall Totals
 #want a line graph which charts changes in prevalence over time split by the 3 conditions. 
 # graph where x is years, y is prevalance, split with climate change
 overall_disaster <- full_data %>%
@@ -215,26 +228,51 @@ overall_disaster <- full_data %>%
 
 plot1 <- 
     ggplot(full_data, aes(x = year, y = after_stat(count), color = climate_change_effect)) +
-  geom_line(stat = "count") +
-    geom_line(data = overall_disaster, aes(y = total_disasters, color = "Total Disasters")) +
+      geom_line(data = overall_disaster, aes(y = total_disasters, color = "Total Disasters"), size = 1) +
+  geom_line(stat = "count", size = 1) +
   labs(x = "Year", y = "Prevalence", color = "Climate Change Effect") +
-  ggtitle("Prevalence of Natural Disasters from 2000 - 2022") +
-  theme_minimal() 
+  ggtitle("Prevalence of Natural Disasters(2000 - 2022)") +
+    scale_color_manual(values = c("Total Disasters" = "black",  # Specify colors for each line
+                                 "Primary effect" = "#E74C3C",
+                                 "Secondary effect" = "#F39C12",
+                                 "Not related" = "#616A6B")) +
+  theme_minimal() +
+    theme(plot.title = element_text(size = 16),
+                  axis.text.y = element_text(size = 10),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+         strip.text = element_text(size = 12),
+        legend.text = element_text(size = 12),  # Adjust the size of legend text
+          legend.title = element_text(size = 13),
+        legend.key.size = unit(5, "mm"),
+        panel.background = element_rect(fill = "white", colour = "white"))
+
+
    interactive_plot1 <- ggplotly(plot1) %>% layout(width = NULL, height = NULL)
-   
-     interactive_plot1
-#want a line graph which charts in prevelance over time splut by the types of natural disasters 
-   # graph where x is years, y is prevalance, split with type
-   t_disasters <- full_data %>%
-  group_by(year) %>%
-  summarise(total_disasters = n())
+ 
+interactive_plot1 <- layout(interactive_plot1, annotations = list(
+  text = "Data source: EM-DAT",
+ x = 1.30,
+  y = -0.05,
+  showarrow = FALSE,
+  xref = "paper",
+  yref = "paper"
+))   
+
+interactive_plot1
+
+   ggsave("output/disaster_prevelance.png", plot = plot1, width =6, height = 4)
+saveWidget(interactive_plot1, file = "output/interactive_disaster_prevelance.html")
+
+
 
 ```
 
  
 
 
-### *What regions have experienced the most natural disasters since the year 2000? Has this changed over time?*
+### Question 2 
+**What regions have experienced the most natural disasters since the year 2000? Has this changed over time?**
 
  
  
@@ -251,36 +289,78 @@ full_data$climate_change_effect <- factor(full_data$climate_change_effect, level
 #levels(full_data$climate_change_effect)
 hover_text <- paste(
   "Year: ", full_data$year,
-  "<br>Climate Change Effect: ", full_data$climate_change_effect,
-  "<br>Type: ", full_data$type,
-  "<br>Subtype: ", full_data$subgroup,
-  "<br>Region: ", full_data$region
+  "<br>Type: ", full_data$type
   )
 
 # Replace "interaction(climate_change_effect)" with "Climate Change Effect" in hover text
 
- 
 
 p <- ggplot(full_data, aes(x = year,  y = after_stat(count), fill = climate_change_effect, text = hover_text)) +
-  geom_bar(position = "stack", alpha = 0.8, colour = "white", size = 0.3) +
-  facet_wrap(~ region, scales = "free_x") +
-  scale_fill_manual(values = c("red", "orange", "black")) + 
-  labs(title = "Prevelance of Natural Disasters per Region split by Effect of Climate Change",
-       subtitle = "Data from EM-DAT",
-       x = "Year",
+  geom_bar(position = "stack", alpha = 0.8, colour = "white", size = 0.1) +
+  facet_wrap(~ region, scales = "free_x", nrow = 2) +
+  scale_fill_manual(values = c("#E74C3C", "#F39C12", "#616A6B")) + 
+  labs(title = "Prevelance of Natural Disasters per Continent",
+       caption = "Data source: EM-DAT",
+       x = " ",
        y = "Number of Disasters",
        fill = "Effect of Climate Change") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
- 
- 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+         strip.text = element_text(size = 12),
+        legend.text = element_text(size = 12),  # Adjust the size of legend text
+        legend.title = element_text(size = 13),
+        legend.key.size = unit(5, "mm"),
+        plot.title = element_text(size = 16),
+        panel.background = element_rect(fill = "white", colour = "white"))
+
+
 
 ip<- ggplotly(p, tooltip = c( "y", "text")) %>% layout(width = NULL, height = NULL)
-ip 
+
  
  
 
- 
+
+# Add caption
+ip <- layout(ip, annotations = list(
+  text = "Data source: EM-DAT",
+ x = 1.25,
+  y = -0.05,
+  showarrow = FALSE,
+  xref = "paper",
+  yref = "paper"
+))
+
+
+
+ggsave("output/disaster_per_region.png", plot = p, width =6, height = 4)
+saveWidget(ip, file = "output/interactive_disaster_per_region.html")
+
+ip
 ```
+
  
+ 
+ 
+# Summary
+
+# Reflection 
+Brief thoughts on what you have learnt, what you might do next if you had more time / more data
+ 
+ 
+ 
+# to do 
+ - need to pick best  - fonts, size of elements, type of elements adjusted in service of message of the visualisation
+ 
+ - add the interpretations - clear, insightful notes on possible intepretations, limitations and wider context 
+ -clear, insightful notes on possible extensions or follow-ups
+ -add the code book - ode book and/or description of data values and definitions included
+ -add the details in the code 
+ - add the sanity checks 
+ - can i add a footnote to the graph explaining how to interact?
+ - automated system for package management used (containers, packrat, etc)"?
+ -clear data source with accompanied by full, permanent citation 
  
