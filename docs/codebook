@@ -1,0 +1,101 @@
+Codebook
+
+A list of all variables within the original csv file (emdat.csv). 
+
+“DiscNo.”	                    Unique 8 digit id used by the EM-DAT 
+
+“Historic”              	    Binary (Yes/No) specifying id the disaster happened before 2000
+
+“Classification Key”	        Unique 15 character id combining group, subgroup, type and subtype
+
+“Disaster Group” 	            Name of the disaster group, i.e., Natural
+
+“Disaster Subgroup” 	        Name of disaster subgroup, i.e., Climatological 
+
+“Disaster Type” 	            Name of the specific type of disaster i.e., Wildfire 
+
+“Disaster Subtype”      	    More information on the type of disaster i.e., Forest fire
+
+“External IDs” 	              Data source of the information
+
+“Event Name” 	                Name of the disaster if appropriate 
+
+“Country”                   	Country where the disaster occurred
+
+“Subregion”                 	Part of the continent where the disaster occurred 
+
+“Region” 	                    Continent where the disaster occurred 
+
+“Location”                  	Specific address of the disaster if known
+
+“Origin” 	                    Contextual factors which led to the event if known
+
+“Associated Types” 	          List of secondary disasters as a direct effect or co-occurring with the disaster
+
+“OFDA/BHA Response” 	        Binary (yes/no) specifying if the OFDA/BHA responded to the disaster
+
+“Appeal” 	                    Binary (yes/no) specifying if an appeal for international assistance was made
+
+“Declaration”           	    Binary (yes/no) specifying if a state of emergency was declared
+
+“Aid Contribution (‘000US$)” 	Total amount in thousands of contributions for immediate relief
+
+“Magnitude” 	                Intensity of a the disaster
+
+“Magnitude Scale”       	    The unit of measure for the Magnitude score
+
+“Latitude” 	                  North-South co-ordinate for disaster
+
+“Longitude”             	    East-West co-ordinate for the disaster
+
+“River Basin”               	Name of the river basin effected by a flood
+
+“Start Year” 	                Year the disaster began	
+
+“Start Month”           	    Month the disaster began
+
+“Start Day”             	    Day the disaster began 
+
+“End Year” 	                  Year the disaster ended 
+
+“End Month”             	    Month the disaster ended
+
+“End Day” 	                  Day the disaster ended 
+
+“Total Deaths” 	              Total fatalities (deceased and missing)
+
+“No. Injured” 	            	Total injured who required immediate medical assistance
+
+“No. Affected” 	              Number of people requiring immediate assistance due to the disaster
+
+“No. Homeless” 	              Number of people requiring shelter due to their house being destroyed or damaged
+
+“Total Affected” 	            Total number injured, affected and homeless combined
+
+“Reconstruction Costs (‘000US$)” 	        	Cost for replacing lost assets relative to start year
+
+“Reconstruction Costs, Adjusted (‘000US$)” 	Total reconstruction code adjusted for inflation
+
+“Insured Damage (‘000US$)” 	                The economic damage covered by insurance companies relative to start year
+
+“Insured Damage, Adjusted (‘000US$)” 	      The total insured cost adjusted for inflation 
+
+“CPI” 		                  The Consumer price index used to adjust for inflation 
+
+“Admin Units” 	            Collection of administrative units 
+
+“Entry Date” 	              Day the event was record in the EM-DAT database
+
+“Last Update” 	            Last modification of this event on the EM-DAT database
+
+
+
+For more information see  (https://doc.emdat.be/docs/data-structure-and-content/emdat-public-table/)
+
+
+
+
+An additional variable made for my project. The code to create the variable can be found in the Rmarkdown doc (index.Rmd)
+
+“climate_change_effect""	   If the natural disaster was a direct effect of climate change, indirect effect or not related based on an EU report. 
+
