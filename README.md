@@ -4,7 +4,7 @@ PSY6522 module project. This is a visualisation project using natural disaster d
 ## Project guide
 This project can be run fully from the index.Rmd file.
 
-Repository structure
+*Repository structure*
 
 .gitignore : specific files intentionally exluded from the repository
 
