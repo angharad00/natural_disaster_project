@@ -1,6 +1,10 @@
 Codebook
 
-A list of all variables within the original csv file (emdat.csv). 
+Data source: The International Disaster Database avalible at www.emdat.be.
+The dataset is maintained by The Centre for Research on the Epidemiology of Disasters (CRED), UCLouvain, Brussels, Belgium.
+
+
+List of all variables within the original csv file (emdat.csv): 
 
 “DiscNo.”	                    Unique 8 digit id used by the EM-DAT 
 
@@ -87,8 +91,6 @@ A list of all variables within the original csv file (emdat.csv).
 “Entry Date” 	              Day the event was record in the EM-DAT database
 
 “Last Update” 	            Last modification of this event on the EM-DAT database
-
-
 
 For more information see  (https://doc.emdat.be/docs/data-structure-and-content/emdat-public-table/)
 
