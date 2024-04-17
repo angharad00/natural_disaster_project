@@ -89,7 +89,7 @@ extra terrestrial - A hazard caused by asteroids, meteoroids, and comets as they
 
 - **Region** - Region or continent where the disaster occurred
 
-- *Year** - the year the disaster started
+- **Year** - the year the disaster started
 
 - **Climate Change Effect** - whether the natural disaster is a direct effect of climate change, indirect effect of climate change or unrelated to climate change. Categorized based on [EU report](https://www.europarl.europa.eu/meetdocs/2004_2009/documents/dv/ieep_cc_natural_disasters_/ieep_cc_natural_disasters_en.pdf). 
   - Direct Effect - Extreme Temperature, Flood, Storm
