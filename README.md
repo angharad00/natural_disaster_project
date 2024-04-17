@@ -16,7 +16,7 @@ docs : folder which contains the codebook txt file outlining all the varaibles i
 
 index.html : html rendered markdown document
 
-index.Rmd : My main markdown script which runs the project
+index.Rmd : My main markdown document which runs the project
 
 LICENSE : publishing license from github
 
