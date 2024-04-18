@@ -12,7 +12,7 @@ This project can be run fully from the index.Rmd file.
 
 data : folder which contains the csv data file called emdat.csv
 
-docs : folder which contains the codebook txt file outlining all the varaibles in the csv file
+docs : folder which contains the codebook txt file outlining all the varaibles in the csv file and a pdf version of the markdown
 
 index.html : html rendered markdown document
 
@@ -22,7 +22,7 @@ LICENSE : publishing license from github
 
 natural_disaster_project.Rproj : r project directory
 
-output : folder which contains automatically saved graphs 
+output : folder which contains automatically saved graphs and a screenshot of the main visualisation 
 
 README.md : this file
 
