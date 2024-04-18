@@ -1,12 +1,12 @@
 ---
 title: "Natural Disasters (occuring between 2000-2022)"
 output:
+  pdf_document: default
   html_document:
     toc: true
     toc_float: true  
     toc_depth: 3
     highlight: tango
-  pdf_document: default
 date: "`r Sys.Date()`"
 ---
 
@@ -20,6 +20,7 @@ pre code, pre, code {
 }
 body {
   font-size: 14px;
+  font-family: Arial;
 }
 ```
 
@@ -115,7 +116,10 @@ data <- here("data","emdat.csv") %>% read_csv()
 
 
 # select columns relevant to research question 
-my_data <- data %>% select(c(Historic, DisNo., Historic, `Classification Key`, `Disaster Group`, `Disaster Subgroup`, `Disaster Type`, `Disaster Subtype`, ISO, Country, Subregion, Region, `Start Year`, `Start Month`, `Start Day`))
+my_data <- data %>% select(c(Historic, DisNo., Historic, `Classification Key`, 
+                             `Disaster Group`, `Disaster Subgroup`, `Disaster Type`,
+                             `Disaster Subtype`, ISO, Country, Subregion, Region, 
+                             `Start Year`, `Start Month`, `Start Day`))
 
 #check
 # nrow(my_data) #16388
@@ -158,16 +162,21 @@ my_data <- my_data %>% mutate(year = as.numeric(year),
 #total number of disasters per year
 
 
-kable(my_data %>% group_by(year) %>% summarise(count = n()) %>% head(), caption = "First 6 rows showing historic data. Historic entries before 2000 are markedly lower") %>%
+kable(my_data %>% 
+        group_by(year) %>% 
+        summarise(count = n()) %>%
+        head(), caption = "First 6 rows showing historic data. Historic entries before 2000 are markedly lower") %>%
   kable_styling()
-#looks as if the data from before the 90s was markedly lower - it is unlikely due to changes in the environment instead changes in recording quality  
+#looks as if the data from before the 90s was markedly lower - 
 
-#remove any Historic data - data from before 2000 (when the EM-DAT started recording live) 
-updated_data <- my_data %>% filter(historic == "No")
+
+#remove any Historic data - data from before 2000 
+updated_data <- my_data %>% 
+  filter(historic == "No")
 
 # nrow(updated_data) #9505
 
-#check i have not lost any data I shouldn't have 
+#check I have not lost any data I shouldn't have 
 my_data %>% nrow() - my_data %>% filter(historic == "Yes") %>% nrow() #9505
 
 ```
@@ -177,13 +186,19 @@ my_data %>% nrow() - my_data %>% filter(historic == "Yes") %>% nrow() #9505
 Now the data is set up I can create a new column with the climate change information.
 
 ```{r, fig.show='hold'}
-#make a new column which categories the type of natural disaster as direct effect of climate change, indirect effect of climate change and not related
+#make a new column for climate change effect
 
-# Define vectors of natural disasters classified as primary and secondary effects of climate change
-direct_effects <- c("Extreme temperature", "Flood", "Storm")
-indirect_effects <- c("Glacial lake outburst flood", "Drought", "Wildfire",  "Mass movement (wet)", " Mass movement (dry)")
+# Define vectors for climate change effect
+direct_effects <- c("Extreme temperature", 
+                    "Flood", 
+                    "Storm")
+indirect_effects <- c("Glacial lake outburst flood", 
+                      "Drought", 
+                      "Wildfire",  
+                      "Mass movement (wet)", 
+                      " Mass movement (dry)")
  
-# Create a new column using a loop which runs through the type column and assigns each entry to the correct climate change condition based on the defined vectors. 
+# Create a new column using a loop to assigns climate change condition 
 full_data <- updated_data %>%
   mutate(climate_change_effect = case_when(
     updated_data$type %in% direct_effects ~ "Direct effect",
@@ -196,7 +211,10 @@ full_data$climate_change_effect <- factor(full_data$climate_change_effect)
 #class(full_data$climate_change_effect)
 
 #set a sensible order to aid plotting 
-full_data$climate_change_effect <- factor(full_data$climate_change_effect, levels = c("Direct effect", "Indirect effect", "Not related")) 
+full_data$climate_change_effect <- factor(full_data$climate_change_effect,
+                                          levels = c("Direct effect",
+                                                     "Indirect effect",
+                                                     "Not related")) 
 #levels(full_data$climate_change_effect)
 
 #check
@@ -212,19 +230,30 @@ Now my data set is ready I can look at basic summaries to see if everything is e
 ```{r, fig.show='hold'}
 #view the counts of key variables 
 #summary of number of disasters grouped by subgroup and type of disaster
-kable(full_data %>% group_by(subgroup, type) %>% summarise(count = n()) %>% head(), caption = "First 6 rows showing counts of disasters by subgroup and type") %>%
+kable(full_data %>% 
+        group_by(subgroup, type) %>%
+        summarise(count = n()) %>% 
+        head(), caption = "First 6 rows showing counts of disasters by subgroup and type") %>%
   kable_styling()
 
 #summary of number of disasters for each region 
-kable(full_data %>% group_by(region) %>% summarise(count = n()) %>% head(), caption = "overall counts of disasters per continent") %>%
+kable(full_data %>% 
+        group_by(region) %>% 
+        summarise(count = n()) %>% 
+        head(), caption = "overall counts of disasters per continent") %>%
   kable_styling()
 
 #summary of number of disaster for each year 
-kable(full_data %>% group_by(year, region) %>% summarise(count = n()) %>% head(), caption = "First 6 rows showing counts of disaster per continent each year") %>%
+kable(full_data %>% 
+        group_by(year, region) %>% 
+        summarise(count = n()) %>% 
+        head(), caption = "First 6 rows showing counts of disaster per continent each year") %>%
   kable_styling()
 
 
-full_data %>% group_by(type) %>% summarise(count = n())
+full_data %>% 
+  group_by(type) %>% 
+  summarise(count = n())
 ```
 <br><br><br><br><br>
 
@@ -243,10 +272,10 @@ full_data %>% group_by(type) %>% summarise(count = n())
 ```{r, fig.show='hold'}
 
 #Overall Totals
-#want a line graph which charts changes in prevalence over time split by the 3 climate conditions. 
+#line graph which charts changes in prevalence over time split climate conditions. 
 
 # graph where x is years, y is prevalence, split by climate change
-# use summarise to create data set with total number of disaster per year not split by type or country to provide total natural disaster data 
+# use summarise to provide total natural disaster data 
 
 overall_disaster <- 
   full_data %>%
@@ -256,24 +285,27 @@ overall_disaster <-
 
 
 plot1 <- 
-   #plot year on the x axis, apply a stats function counting the number of rows in each condition for climate change effect 
-    ggplot(full_data, aes(x = year, y = after_stat(count), color = climate_change_effect)) +  
-   #add line to plot the data with the total disasters to the same graph and set the line size to 1
-  geom_line(data = overall_disaster, aes(y = count, color = "Total Disasters"), size = 1) + 
-    #set the line statistic to count and line size to 1
+   #plot year on the x axis, add stats function to count frequency
+    ggplot(full_data, 
+           aes(x = year, y = after_stat(count), 
+               color = climate_change_effect)) +  
+   #add line to plot the data with the total disasters
+  geom_line(data = overall_disaster, 
+            aes(y = count, color = "Total Disasters"), size = 1) + 
+   #set the line statistic to count and line size to 1
   geom_line(stat = "count", size = 1) +
-  #apply labels for the axis and legend
+   #apply labels for the axis and legend
   labs(x = "Year", y = "Prevalence", color = "Climate Change Effect") +
-  #add a title 
+   #add a title 
   ggtitle("Prevalence of Natural Disasters(2000 - 2022)") +
-  #specify colours for each line
+   #specify colours for each line
   scale_color_manual(values = c("Total Disasters" = "black",
                                  "Direct effect" = "#E74C3C",
                                  "Indirect effect" = "#F39C12",
                                  "Not related" = "#616A6B")) +
-  #set the basic theme for the graph
+   #set the basic theme for the graph
   theme_minimal() +
-  #make adjustments to the theme
+   #make adjustments to the theme
   theme(plot.title = element_text(size = 16),   #adjust the size of the title
         axis.text.y = element_text(size = 10),  #adjust the size of x axis scale
         axis.title.x = element_text(size = 12),  #adjust the size of the x axis title 
@@ -282,32 +314,35 @@ plot1 <-
         legend.text = element_text(size = 12),  # adjust the size of legend text
         legend.title = element_text(size = 13),  # adjust the size of legend title
         legend.key.size = unit(3, "mm"),  # adjust the size of legend colours
-        panel.background = element_rect(fill = "white", colour = "white"))   # make sure the background is white for saving
+        panel.background = element_rect(fill = "white", colour = "white"))  
+#white background
 
-
-interactive_plot1 <-
-  ggplotly(plot1, tooltip = c( "y", "x")) %>% layout(width = NULL, height = NULL) #makes the plot interactive and allows the size to resize when rendered to different html screens
+interactive_plot1 <-   #makes the plot interactive  
+  ggplotly(plot1, tooltip = c( "y", "x")) %>% 
+  layout(width = NULL, height = NULL) #resize plot 
  
 interactive_plot1 <-   
-  layout(interactive_plot1, annotations = list(    #add a caption to the interactive plot
+  layout(interactive_plot1, annotations = list(    #add a caption  
   text = "Data source: EM-DAT",   #write the caption
-  x = 1.30,   #set the x co-ordinate for the caption to be displayed 
+  x = 1.425,   #set the x co-ordinate for the caption to be displayed 
   y = -0.05,  #set the y co-ordinate for the caption to be displayed 
   showarrow = FALSE,   #don't include an arrow 
-  xref = "paper",   #specifies the co-ordinates are respective to the whole plot
+  xref = "paper",   #specifies the co-ordinates reference point
   yref = "paper"
 ))   
 
 
 
 #save the ggplot as a png file with a white background
-ggsave("output/disaster_prevelance.png", plot = plot1, bg = "white", width =6, height = 4)
+ggsave("output/disaster_prevelance.png", 
+       plot = plot1, bg = "white", width =6, height = 4)
 
 #save the interactive plot as a html file 
-saveWidget(interactive_plot1, file = "output/interactive_disaster_prevelance.html")
+saveWidget(interactive_plot1,
+           file = "output/interactive_disaster_prevelance.html")
 
 ```
-<br>
+ 
 
 #### Graph 
 
@@ -335,7 +370,8 @@ There is no obvious increase in natural disasters globally since 2000, however, 
  
 ```{r, fig.show='hold'}
 
-#create a stacked bar chart with with the counts of disaster for each year. have it primarily split by climate change effect but include the types of disasters which make up each category. 1 graph per continent
+#create a stacked bar chart with with the counts of disaster for each year.
+#split by climate change effect and type
 
 #sets what the hover text shows for each data point in the interactive plot
 hover_text <- paste(
@@ -345,12 +381,18 @@ hover_text <- paste(
   )
 
 plot2 <- 
-  #plot year on the x axis. plot the count on the y axis for each climate change category. specify that the hover_text will be shown when the graph is interactive
-  ggplot(full_data, aes(x = year,  y = after_stat(count), fill = climate_change_effect, text = hover_text)) +
-  #plot the data as a stacked bar graph. set the transparency to 0.8, the line colour to white and thickness of the line to 0.1
-  geom_bar(position = "stack", alpha = 0.8, colour = "white", size = 0.1) +
-  #use facet_wrap to split the graph up by region (continent) to create 5 mini graphs. add scales = "free_x" to make sure the x axis is repeated under each graph. distribute the 5 graphs over 2 rows. 
-  facet_wrap(~ region, scales = "free_x", nrow = 2) +
+  #plot year on the x axis. plot the count on the y axis for climate change. 
+  #specify that the hover_text will be shown when the graph is interactive
+  ggplot(full_data,
+         aes(x = year,  y = after_stat(count), 
+             fill = climate_change_effect,
+             text = hover_text)) +
+  geom_bar(position = "stack", #plot the data as a stacked bar graph.
+           alpha = 0.8,  # set the transparency to 0.8, 
+           colour = "white", #the line colour to white 
+           size = 0.1) + # thickness of the line to 0.1
+  #use facet_wrap to split the graph up by region (continent) 
+  facet_wrap(~ region, scales = "free_x", nrow = 2) + #fix x scales and 2 graph per row.
   #specify the colours for each climate change category
   scale_fill_manual(values = c("#E74C3C", "#F39C12", "#616A6B")) + 
   #add labels
@@ -362,7 +404,7 @@ plot2 <-
   #apply basic theme
   theme_minimal() +
   #adjustments to the theme
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10),  # Add a slant on the x scale and set text size to 10
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10),  # Add a slant
         axis.text.y = element_text(size = 10),  # Adjust the size of y axis scale 
         axis.title.x = element_text(size = 12),  # Adjust the size of the x axis title 
         axis.title.y = element_text(size = 12),  # Adjust the size of the y axis title 
@@ -371,13 +413,15 @@ plot2 <-
         legend.title = element_text(size = 13),  # Adjust the size of legend title 
         legend.key.size = unit(3, "mm"),  # Adjust the size of legend squares
         plot.title = element_text(size = 16),   # Adjust the size of plot title 
-        panel.background = element_rect(fill = "white", colour = "white"))  # set background to white
+        panel.background = element_rect(fill = "white", colour = "white"))  
+# set background to white
 
 
 
 
-interactive_plot2<- 
-  ggplotly(plot2, tooltip = c( "y", "text")) %>% layout(width = NULL, height = NULL) #make plot interactive. set the tooltip to show the y values (the count) and the hover_text information. set size of graph
+interactive_plot2<-   #make plot interactive.
+  ggplotly(plot2, tooltip = c( "y", "text")) %>%  #set tooltip
+layout(width = NULL, height = NULL) #set graph size
 
  
  
@@ -389,20 +433,22 @@ interactive_plot2 <-
   text = "Data source: EM-DAT",   #caption 
   x = 1.25,    #x co-ordinate  
   y = -0.05,   # y co-ordinate 
-  showarrow = FALSE,   #dont show an arrow
+  showarrow = FALSE,   #don't show an arrow
   xref = "paper",   #set co-ordinate to reference entire plot
   yref = "paper"
 ))
 
 
 #save ggplot as a pgn with a white background
-ggsave("output/disaster_per_region.png", plot = plot2, bg = "white", width =6, height = 4)
+ggsave("output/disaster_per_region.png", 
+       plot = plot2, bg = "white", width =6, height = 4)
 
 #save interactive plot to a html file
-saveWidget(interactive_plot2, file = "output/interactive_disaster_per_region.html")
+saveWidget(interactive_plot2,
+           file = "output/interactive_disaster_per_region.html")
 
 ```
-<br>
+ 
 
 #### Graph 
 
