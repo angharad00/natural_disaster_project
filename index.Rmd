@@ -1,12 +1,12 @@
 ---
 title: "Natural Disasters (occuring between 2000-2022)"
 output:
-  pdf_document: default
   html_document:
     toc: true
     toc_float: true  
     toc_depth: 3
     highlight: tango
+  pdf_document: default
 date: "`r Sys.Date()`"
 ---
 
@@ -27,10 +27,6 @@ body {
 
 
 ```{r setup, include = FALSE, echo=FALSE}
-knitr::opts_chunk$set(fig.width=8, fig.height=6,
-	message = FALSE,
-	warning = FALSE
-)
 
 #install.packages("here")
 library(here)
@@ -50,6 +46,12 @@ library(ggrepel)
 library(htmlwidgets) 
 #install.packages("kableExtra")
 library(kableExtra)
+
+knitr::opts_chunk$set(fig.width=8, fig.height=6,
+	message = FALSE,
+	warning = FALSE
+)
+
 ```
 
 # Research Questions
