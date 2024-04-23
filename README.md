@@ -18,6 +18,8 @@ index.html : html rendered markdown document
 
 index.Rmd : My main markdown document which runs the project
 
+index.pdf : pdf version of my markdown
+
 LICENSE : publishing license from github
 
 natural_disaster_project.Rproj : r project directory
