@@ -99,5 +99,5 @@ For more information see  (https://doc.emdat.be/docs/data-structure-and-content/
 
 An additional variable made for my project. The code to create the variable can be found in the Rmarkdown doc (index.Rmd)
 
-“climate_change_effect""	   If the natural disaster was a direct effect of climate change, indirect effect or not related based on an EU report. 
+"climate_change_effect"	   If the natural disaster was a direct effect of climate change, indirect effect or not related based on an EU report. 
 
