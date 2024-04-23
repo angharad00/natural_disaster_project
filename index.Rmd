@@ -178,7 +178,7 @@ combined_table <- rbind(first_few, last_few)
 
 
 kable(combined_table,
-      caption = "First 6 rows showing historic data and last 6 rows showing most recent") %>%
+      caption = "First 3 rows showing historic data and last 3 rows showing most recent") %>%
   kable_styling()
 
 
