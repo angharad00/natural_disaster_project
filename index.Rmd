@@ -1,12 +1,12 @@
 ---
 title: "Natural Disasters (occuring between 2000-2022)"
 output:
-  pdf_document: default
   html_document:
     toc: true
     toc_float: true  
     toc_depth: 3
     highlight: tango
+  pdf_document: default
 date: "`r Sys.Date()`"
 ---
 
@@ -76,15 +76,15 @@ The data set comes from the **Centre for Research on the Epidemiology of Disaste
 ## Key Variables To Know
 
 
-To answer my research questions need to know where and when different natural disasters occurred. The following variables from the EM-DAT database relevant to my research questions are:
+To answer my research questions I need to know where and when different natural disasters occurred. The following variables from the EM-DAT database are relevant to my research questions:
 
 - **Group** - The disaster subgroup:
   - Geophysical - a hazard cause by tectonic plate movement i.e., earthquakes 
   - Hydrological - a hazard cause by extreme changes in distribution of water such as flooding or drought
   - Meteorological - a hazard cause by atmospheric change such as extreme temperature  
   - Climatological - a hazard cause by sustained periods of hot or cold such as wildfires 
-  - Biological - a hazard cause by bacteria viruses etc which effect human health i.e. an epidemic 
-extra terrestrial - A hazard caused by asteroids, meteoroids, and comets as they pass near-earth
+  - Biological - a hazard cause by bacteria viruses etc., which effect human health i.e. an epidemic 
+  - Extra terrestrial - A hazard caused by asteroids, meteoroids, and comets as they pass near-earth
 
 - **Type** - The specific type of disaster i.e., Drought or Earthquake
 
@@ -92,7 +92,7 @@ extra terrestrial - A hazard caused by asteroids, meteoroids, and comets as they
 
 - **Year** - the year the disaster started
 
-- **Climate Change Effect** - whether the natural disaster is a direct effect of climate change, indirect effect of climate change or unrelated to climate change. Categorized based on [EU report](https://www.europarl.europa.eu/meetdocs/2004_2009/documents/dv/ieep_cc_natural_disasters_/ieep_cc_natural_disasters_en.pdf). 
+- **Climate Change Effect** - whether the natural disaster is a direct effect of climate change, indirect effect of climate change or unrelated to climate change. Categorized based on an [EU report](https://www.europarl.europa.eu/meetdocs/2004_2009/documents/dv/ieep_cc_natural_disasters_/ieep_cc_natural_disasters_en.pdf). 
   - Direct Effect - Extreme Temperature, Flood, Storm
   - Indirect Effect - Glacial lake outburst flood, Drought, Wildfire, Mass Movement (wet and dry)
   - Not related - Volcanic activity, Earthquake, Animal incident, Epidemic, Impact, Infestation
@@ -160,21 +160,34 @@ my_data <- my_data %>% mutate(year = as.numeric(year),
 
 #look at the data
 #total number of disasters per year
+historical <- my_data %>% 
+        group_by(year) %>% 
+        summarise(count = n())
+# Only look at first 3 rows.
+first_few <- historical %>%
+        head(3)
 
-
-kable(my_data %>% 
+# Only look at last 3 rows.
+last_few <- my_data %>% 
         group_by(year) %>% 
         summarise(count = n()) %>%
-        head(), caption = "First 6 rows showing historic data. Historic entries before 2000 are markedly lower") %>%
+        tail(3)
+
+# Combine old and new
+combined_table <- rbind(first_few, last_few)
+
+
+kable(combined_table,
+      caption = "First 6 rows showing historic data and last 6 rows showing most recent") %>%
   kable_styling()
-#looks as if the data from before the 90s was markedly lower - 
 
 
 #remove any Historic data - data from before 2000 
 updated_data <- my_data %>% 
   filter(historic == "No")
 
-# nrow(updated_data) #9505
+# check 
+#nrow(updated_data) #9505
 
 #check I have not lost any data I shouldn't have 
 my_data %>% nrow() - my_data %>% filter(historic == "Yes") %>% nrow() #9505
@@ -208,6 +221,8 @@ full_data <- updated_data %>%
 
 #set the climate_change_effect variable to a factor
 full_data$climate_change_effect <- factor(full_data$climate_change_effect)
+
+#check 
 #class(full_data$climate_change_effect)
 
 #set a sensible order to aid plotting 
@@ -215,6 +230,7 @@ full_data$climate_change_effect <- factor(full_data$climate_change_effect,
                                           levels = c("Direct effect",
                                                      "Indirect effect",
                                                      "Not related")) 
+#check
 #levels(full_data$climate_change_effect)
 
 #check
@@ -251,9 +267,7 @@ kable(full_data %>%
   kable_styling()
 
 
-full_data %>% 
-  group_by(type) %>% 
-  summarise(count = n())
+ 
 ```
 <br><br><br><br><br>
 
@@ -272,11 +286,10 @@ full_data %>%
 ```{r, fig.show='hold'}
 
 #Overall Totals
-#line graph which charts changes in prevalence over time split climate conditions. 
-
+#line graph which charts changes in prevalence over time split by climate conditions. 
 # graph where x is years, y is prevalence, split by climate change
-# use summarise to provide total natural disaster data 
 
+# use summarise to provide total natural disaster data 
 overall_disaster <- 
   full_data %>%
   group_by(year) %>%
@@ -295,7 +308,10 @@ plot1 <-
    #set the line statistic to count and line size to 1
   geom_line(stat = "count", size = 1) +
    #apply labels for the axis and legend
-  labs(x = "Year", y = "Prevalence", color = "Climate Change Effect") +
+  labs(x = "Year", 
+       y = "Prevalence",
+       color = "Climate Change Effect", 
+       caption = "Data source: EM-DAT") +
    #add a title 
   ggtitle("Prevalence of Natural Disasters(2000 - 2022)") +
    #specify colours for each line
@@ -350,12 +366,12 @@ saveWidget(interactive_plot1,
 #display the plot
 interactive_plot1
 ```
-*To use the interactive graph hover over areas of the visualization you are interested in. If you would like to isolate conditions double click on the legend to select what you would like to see. If you would like to zoom in or out you can drag over you area of interest or use the magnifying glass icon located in the top right corner. To reset the axis press the home button in the top right corner.*
+*To use the interactive graph hover over areas of the visualization you are interested in. If you would like to isolate conditions double click on the legend to select what you would like to see. If you would like to zoom in or out you can drag over an area of interest or use the magnifying glass located in the top right corner. To reset the axis press the home button in the top right corner.*
 
  <br>
  
 #### Interpretations
-There is no obvious increase in natural disasters globally since 2000, however, the direct effect of climate change is stark. It is clear that natural disasters directly effected by climate change ( Extreme Temperature, Flood and Storm) make up the highest number of natural disaster each year. Natural disasters which are an indirect effect of climate change i.e. a consequence of direct natural disasters e.g. drought make up a smaller number of total disasters. Natural disasters not related to climate change make up a small proportion of disasters since 2000. 
+There is no obvious increase in natural disasters globally since 2000, however, the direct effect of climate change is stark. It is clear that natural disasters directly effected by climate change ( Extreme Temperature, Flood and Storm) make up the highest number of natural disaster each year. Natural disasters which are an indirect effect of climate change (a consequence of direct natural disasters) such as drought make up a smaller number of total disasters. Natural disasters not related to climate change again account for a small proportion of total disasters since 2000. 
 
 
 <br><br><br><br>
@@ -455,7 +471,7 @@ saveWidget(interactive_plot2,
 ```{r}
 interactive_plot2   #show plot
 ```
-*To use the interactive graph hover over areas of the visualization you are interested in. If you would like to isolate conditions double click on the legend to select what you would like to see. If you would like to zoom in or out you can drag over you area of interest or use the magnifying glass icon located in the top right corner. To reset the axis press the home button in the top right corner.*
+*To use the interactive graph hover over areas of the visualization you are interested in. If you would like to isolate conditions double click on the legend to select what you would like to see. If you would like to zoom in or out you can drag over an area of interest or use the magnifying glass located in the top right corner. To reset the axis press the home button in the top right corner.*
  
  
   <br>
@@ -468,9 +484,9 @@ When visualising natural disasters per continents we see the global trends repea
 
 # Reflection 
 
-I am pleased with the graphs I have made. I played around with lots of different graphs and ways to display my data. The dataset I originally downloaded was large with multiple interesting variables. Ultimately, I chose to focus on the variables which had the most complete data. I think adding the interactive element to my graph really enhanced my visualisation and allowed me to include more information. The key information I wanted to translate was the prevalence of disasters over time split by the effect of climate change. I felt, however, that this was not enough and was interested in creating a main visualisation which not only show the split per continent but also the specific disasters actually made up the climate change categories. I hope that this has translated well on different devices. An issue with my second visualisation in particular is that it can render rather small on some screens making it difficult to see events which were rare. Hopefully the zoom function on the interactive graph will help with readability. 
+I am pleased with the graphs I have made. I played around with lots of different graphs and ways to display my data. The dataset I originally downloaded was large with multiple interesting variables. Ultimately, I chose to focus on the variables which had the most complete data. I think adding the interactive element to my graph really enhanced my visualisation and allowed me to include more information. The key information I wanted to translate was the prevalence of disasters over time split by the effect of climate change. I felt, however, that this was not enough and was interested in creating a main visualisation that not only showed the split per continent but also the specific disaster type which actually makes up the climate change categories. I hope that this has translated well on different devices. An issue with my second visualisation in particular is that it can render rather small on some screens making it difficult to see events which were rare. Hopefully the zoom function on the interactive graph will help with readability. 
 
-If I had more time, I would delve deeper into the locations of the disaster. I did attempt at first to create a world map which showed where the disaster occurred however the information for some of the small islands which make up Oceania were difficult to see on a world map. It would be interesting, however, to have an individual map for each continent which shows where the disasters struck and when. It would have also been interesting to look at some of the different variables on the original dataset such as cost of disaster both to lives and the economy. 
+If I had more time, I would delve deeper into the locations of the disaster. I did attempt at first to create a world map which showed where the disaster occurred, however, the information for some of the small islands which make up Oceania were difficult to see on a world map. It would be interesting, however, to have an individual map for each continent which shows where the disasters struck and when. It would have also been interesting to look at some of the different variables on the original dataset such as cost of disaster both to lives and the economy. 
 
 An issue with the EM-DAT database was firstly the incomplete data for the historical data points. This was initially disappointing as I would have loved to track the trends in natural disasters over the last century, however, the historical record is still being complied and will inevitably be more incomplete the further back you go. Another issue I noticed was only land disasters are recorded, Tsunamis for example were absent. The data entries which are analysed in this project are not therefore an exhaustive list of disasters. 
 
