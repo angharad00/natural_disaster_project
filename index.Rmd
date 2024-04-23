@@ -1,12 +1,12 @@
 ---
 title: "Natural Disasters (occuring between 2000-2022)"
 output:
+  pdf_document: default
   html_document:
     toc: true
     toc_float: true  
     toc_depth: 3
     highlight: tango
-  pdf_document: default
 date: "`r Sys.Date()`"
 ---
 
